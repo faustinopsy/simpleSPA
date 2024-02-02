@@ -1,0 +1,31 @@
+<?php
+header('Content-Type: application/json');
+
+$posts = [
+    [
+        "id" => 1,
+        "title" => "Tecnologia e Inovação",
+        "content" => "Explorando as últimas inovações no mundo da tecnologia e como elas estão mudando o nosso dia a dia.",
+        "image" => "assets/img/image1.jpg"
+    ],
+    [
+        "id" => 2,
+        "title" => "Inteligência Artificial",
+        "content" => "Como a inteligência artificial está sendo integrada em diferentes setores e quais os potenciais impactos.",
+        "image" => "assets/img/image2.jpg"
+    ],
+    [
+        "id" => 3,
+        "title" => "Desenvolvimento Web",
+        "content" => "As tendências atuais no desenvolvimento web e as melhores práticas para criar aplicações web modernas.",
+        "image" => "assets/img/image3.jpg"
+    ],
+    [
+        "id" => 4,
+        "title" => "Segurança da Informação",
+        "content" => "Métodos e práticas recomendadas para garantir a segurança da informação em tempos de dados digitais.",
+        "image" => "assets/img/image4.jpg"
+    ]
+];
+
+echo json_encode($posts);
