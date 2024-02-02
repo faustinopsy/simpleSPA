@@ -1,7 +1,7 @@
-import HomePage from '../pages/homePage.js';
-import AboutPage from '../pages/aboutPage.js';
-import ContactPage from '../pages/contactPage.js';
-import Navbar from './navbar.js';
+import HomePage from '../pages/HomePage.js';
+import AboutPage from '../pages/AboutPage.js';
+import ContactPage from '../pages/ContactPage.js';
+import Navbar from './Navbar.js';
 
 class Router {
     constructor() {

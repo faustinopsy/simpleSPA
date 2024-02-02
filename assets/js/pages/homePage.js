@@ -1,4 +1,4 @@
-import Component from '../component/component.js';
+import Component from '../component/Component.js';
 import FetchData from '../lib/FetchData.js';
 import CardComponent from '../card/CardComponent.js';
 import FullContent from './FullContent.js';
