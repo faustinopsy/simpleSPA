@@ -5,7 +5,7 @@ import FullContent from './FullContent.js';
 import Modal from '../modal/Modal.js';
 class HomePage extends Component {
     constructor() {
-        super();
+        super(); 
         this.title = 'Home - Meu SPA';
         this.description = 'Bem-vindo à página inicial do nosso Single Page Application.';
         this.keywords = 'home,spa,single page application,principal';

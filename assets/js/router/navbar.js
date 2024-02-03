@@ -7,7 +7,6 @@ class Navbar extends Component {
     }
 
     openNav() {
-        console.log(this.navOpen)
         this.navOpen = !this.navOpen; 
         if(this.navOpen){
             document.getElementById("myNav").style.height = "100%";

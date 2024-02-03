@@ -1,57 +1,63 @@
 const CACHE_NAME = 'v001';
 const STATIC_CACHE_URLS = [
  'index.html', 
+ 'offline.html',
  'manifest.json', 
  'assets/js/App.js',
- 'assets/js/sweetalert2.11.js',
- 'assets/js/lang/eng.json',
- 'assets/js/lang/pt.json',
  'assets/js/card/CardComponent.js',
  'assets/js/component/Component.js',
  'assets/js/form/FormContact.js',
  'assets/js/modal/Modal.js',
  'assets/js/lib/FetchData.js',
- 'assets/js/lib/FetchData.js',
- 'assets/js/lib/FetchData.js',
-
- 'assets/css/styles.css',
- 'assets/css/menu.css',
- 'assets/img/cad.png',
- 'assets/img/conf.png',
- 'assets/img/home.png',
- 'assets/img/list.png',
- 'assets/img/logo.png',
- 'assets/img/lotofacil.png',
- 'assets/img/megasena.png',
- 'assets/img/lotomania.png',
- 'assets/img/quina.png',
- 'assets/img/nfacil.png',
- 'assets/img/nmania.png',
- 'assets/img/nquina.png',
- 'assets/img/nmega.png',
+ 'assets/js/pages/AboutPage.js',
+ 'assets/js/pages/ContactPage.js',
+ 'assets/js/pages/ErrorPage.js',
+ 'assets/js/pages/FullContent.js',
+ 'assets/js/pages/HomePage.js',
+ 'assets/js/router/Navbar.js',
+ 'assets/js/router/Router.js',
+ 'assets/js/script.js',
+ 'assets/css/w3.css',
+ 'assets/img/image1.jpg',
+ 'assets/img/image2.jpg',
+ 'assets/img/image3.jpg',
+ 'assets/img/image4.jpg',
+ 'assets/img/logo.png'
  ];
 
-self.addEventListener('fetch', event => {
-event.respondWith(
-  caches.match(event.request)
-    .then(response => {
-      if (response) {
-        return response;
-      }
-      return fetch(event.request);
-    })
-);
+ self.addEventListener('fetch', event => {
+  event.respondWith(
+      caches.match(event.request).then(cachedResponse => {
+          if (cachedResponse) {
+              return cachedResponse;
+          }
+          return fetch(event.request).then(networkResponse => {
+              if (networkResponse.ok) {
+                  return caches.open(CACHE_NAME).then(cache => {
+                      cache.put(event.request, networkResponse.clone());
+                      return networkResponse;
+                  });
+              }
+              return caches.match('offline.html'); 
+          });
+      }).catch(() => {
+          return caches.match('offline.html'); 
+      })
+  );
 });
 
+
 self.addEventListener('install', event => {
-event.waitUntil(
-  caches.open(CACHE_NAME)
-    .then(cache => {
-      console.log('Cache aberto');
-      return cache.addAll(STATIC_CACHE_URLS);
-    })
-);
+  event.waitUntil(
+      caches.open(CACHE_NAME).then(cache => {
+          return cache.addAll(STATIC_CACHE_URLS).catch(error => {
+              console.error("Erro durante o cache.addAll: ", error);
+              throw error;
+          });
+      })
+  );
 });
+
 
 self.addEventListener('activate', event => {
 const cacheWhitelist = [CACHE_NAME]; 

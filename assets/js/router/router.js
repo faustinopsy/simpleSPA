@@ -1,59 +1,82 @@
-import HomePage from '../pages/HomePage.js';
-import AboutPage from '../pages/AboutPage.js';
-import ContactPage from '../pages/ContactPage.js';
 import Navbar from './Navbar.js';
 
 class Router {
     constructor() {
+        this.components = {};
+        this.componentCache = {};
         this.routes = {
-            '/': new HomePage(),
-            '/about': new AboutPage(),
-            '/contact': new ContactPage()
+            '/': 'HomePage',
+            '/about': 'AboutPage',
+            '/contact': 'ContactPage'
         };
         this.init();
+        this.preloadComponents();
     }
 
-    init() {
+    async init() {
         const navbar = new Navbar();
         document.body.insertAdjacentHTML('afterbegin', navbar.render());
-        navbar.afterRender();
+        await navbar.afterRender();
+
         window.addEventListener('popstate', () => {
             this.render(decodeURI(window.location.pathname));
         });
-    
+
         document.body.addEventListener('click', e => {
             if (e.target.matches('.w3-bar-item')) {
                 e.preventDefault();
-                this.navigateTo(e.target.getAttribute('href'));
+                const href = e.target.getAttribute('href');
+                history.pushState(null, null, href);
+                this.render(href);
             }
         });
+
         this.render(decodeURI(window.location.pathname));
     }
 
-    navigateTo(url) {
-        history.pushState(null, null, url);
-        this.render(decodeURI(window.location.pathname));
+    preloadComponents() {
+        const componentsToPreload = ['HomePage', 'AboutPage', 'ContactPage'];
+        componentsToPreload.forEach(componentName => {
+            import(`../pages/${componentName}.js`).then(module => {
+                this.components['/' + componentName.replace('Page', '').toLowerCase()] = module.default;
+            });
+        });
     }
 
-    
-    async  render(pathname) {
-        
-        const page = this.routes[pathname] || new ErrorPage();
+    async render(pathname) {
+        const start = performance.now();
+        let page = this.componentCache[pathname];
+        if (!page) {
+            const componentClass = this.components[pathname] || await this.loadComponent(this.routes[pathname]);
+            page = new componentClass();
+            this.componentCache[pathname] = page; 
+        }
+        const componentClass = this.components[pathname] || await this.loadComponent(this.routes[pathname]);
+        page = new componentClass();
         const pageContent = await page.render();
         document.getElementById('app').innerHTML = pageContent;
         if (page.afterRender) {
-            await page.afterRender(); 
+            await page.afterRender();
         }
-        const title = page.title || 'Página não encontrada';
-        const description = page.description || 'Descrição padrão da página.';
-        const keywords = page.keywords || 'palavra-chave1, palavra-chave2';
-        
-        this.updateMetaTags(title, description, keywords);
+        const end = performance.now(); 
+        console.log(`Carregamento do componente para "${pathname}": ${(end - start).toFixed(2)} ms.`);
+        this.updateMetaTags(page.title, page.description, page.keywords);
     }
-    
-    updateMetaTags(title, description = '', keywords = '') {
+
+    async loadComponent(componentName) {
+        if (!componentName) {
+            return ErrorPage;
+        }
+        if (this.components['/' + componentName.toLowerCase()]) {
+            return this.components['/' + componentName.toLowerCase()];
+        }
+        const module = await import(`../pages/${componentName}.js`);
+        return module.default;
+    }
+
+    updateMetaTags(title, description, keywords) {
         document.title = title;
-    
+
         let metaDescription = document.querySelector('meta[name="description"]');
         if (metaDescription) {
             metaDescription.setAttribute('content', description);
@@ -63,8 +86,7 @@ class Router {
             metaDescription.setAttribute('content', description);
             document.head.appendChild(metaDescription);
         }
-    
-        
+
         let metaKeywords = document.querySelector('meta[name="keywords"]');
         if (metaKeywords) {
             metaKeywords.setAttribute('content', keywords);
@@ -74,9 +96,7 @@ class Router {
             metaKeywords.setAttribute('content', keywords);
             document.head.appendChild(metaKeywords);
         }
-    
     }
-    
 }
 
 export default Router;
