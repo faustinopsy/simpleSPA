@@ -20,9 +20,9 @@ class Navbar extends Component {
         return `
             <div id="myNav" class="overlay">
                 <div class="overlay-content">
-                    <a href="/">Home</a>
-                    <a href="/about">Sobre</a>
-                    <a href="/contact">Contato</a>
+                    <a href="/#">Home</a>
+                    <a href="/#about">Sobre</a>
+                    <a href="/#contact">Contato</a>
                 </div>
             </div>
             <div class="w3-bottom w3-black" style="z-index:99;">
