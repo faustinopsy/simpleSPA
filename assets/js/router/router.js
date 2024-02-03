@@ -35,10 +35,10 @@ class Router {
     }
 
     preloadComponents() {
-        const componentsToPreload = ['HomePage', 'AboutPage', 'ContactPage'];
-        componentsToPreload.forEach(componentName => {
+        Object.keys(this.routes).forEach(route => {
+            const componentName = this.routes[route];
             import(`../pages/${componentName}.js`).then(module => {
-                this.components['/' + componentName.replace('Page', '').toLowerCase()] = module.default;
+                this.components[route] = module.default;
             });
         });
     }
@@ -65,7 +65,8 @@ class Router {
 
     async loadComponent(componentName) {
         if (!componentName) {
-            return ErrorPage;
+            const errorPage = await import(`../pages/ErrorPage.js`);
+            return errorPage.default;
         }
         if (this.components['/' + componentName.toLowerCase()]) {
             return this.components['/' + componentName.toLowerCase()];
