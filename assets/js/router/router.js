@@ -9,14 +9,14 @@ class Router {
             '/#about': 'AboutPage',
             '/#contact': 'ContactPage'
         };
+        this.navbar = new Navbar();
         this.init();
         this.preloadComponents();
     }
 
     async init() {
-        const navbar = new Navbar();
-        document.body.insertAdjacentHTML('afterbegin', navbar.render());
-        await navbar.afterRender();
+        document.body.insertAdjacentHTML('afterbegin', this.navbar.render());
+        await this.navbar.afterRender();
     
         window.addEventListener('hashchange', () => this.render(window.location.hash));
         this.render(window.location.hash);
@@ -31,13 +31,10 @@ class Router {
             }).catch(e => console.error("Erro ao pré-carregar o componente:", componentName, e));
         });
     }
-    
-
     async render(hash) {
         const start = performance.now();
         let normalizedHash = hash.startsWith('/#') ? hash : '/#' + hash.replace('#', '');
         normalizedHash = normalizedHash === '/#' ? normalizedHash : normalizedHash;
-    
         const componentName = this.routes[normalizedHash];
         if (!componentName) {
             console.error("Rota não encontrada, carregando página de erro.");
