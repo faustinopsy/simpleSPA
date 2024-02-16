@@ -30,7 +30,7 @@ class Navbar extends Component {
                     <a href="/#contact" id="contactLink">Contato</a>
                 </div>
             </div>
-            <div class="w3-bottom w3-black" style="z-index:99;">
+            <div class="w3-bottom w3-black" style="z-index:999;">
                 <button class="w3-bar w3-xlarge w3-black w3-display-bottommiddle" id="hamburg" style="cursor: pointer;">☰</button>
             </div>
             <div class="w3-container w3-black" hidden>
