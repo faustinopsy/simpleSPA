@@ -5,98 +5,91 @@ class Router {
         this.components = {};
         this.componentCache = {};
         this.routes = {
-            '/': 'HomePage',
-            '/about': 'AboutPage',
-            '/contact': 'ContactPage'
+            '/#': 'HomePage',
+            '/#about': 'AboutPage',
+            '/#contact': 'ContactPage'
         };
+        this.navbar = new Navbar();
         this.init();
         this.preloadComponents();
     }
 
     async init() {
-        const navbar = new Navbar();
-        document.body.insertAdjacentHTML('afterbegin', navbar.render());
-        await navbar.afterRender();
-
-        window.addEventListener('popstate', () => {
-            this.render(decodeURI(window.location.pathname));
-        });
-
-        document.body.addEventListener('click', e => {
-            if (e.target.matches('.w3-bar-item')) {
-                e.preventDefault();
-                const href = e.target.getAttribute('href');
-                history.pushState(null, null, href);
-                this.render(href);
-            }
-        });
-
-        this.render(decodeURI(window.location.pathname));
+        document.body.insertAdjacentHTML('afterbegin', this.navbar.render());
+        await this.navbar.afterRender();
+    
+        window.addEventListener('hashchange', () => this.render(window.location.hash));
+        this.render(window.location.hash);
     }
+    
 
     preloadComponents() {
         Object.keys(this.routes).forEach(route => {
             const componentName = this.routes[route];
             import(`../pages/${componentName}.js`).then(module => {
                 this.components[route] = module.default;
-            });
+            }).catch(e => console.error("Erro ao pré-carregar o componente:", componentName, e));
         });
     }
-
-    async render(pathname) {
+    async render(hash) {
         const start = performance.now();
-        let page = this.componentCache[pathname];
-        if (!page) {
-            const componentClass = this.components[pathname] || await this.loadComponent(this.routes[pathname]);
-            page = new componentClass();
-            this.componentCache[pathname] = page; 
-        }
-        const componentClass = this.components[pathname] || await this.loadComponent(this.routes[pathname]);
-        page = new componentClass();
-        const pageContent = await page.render();
-        document.getElementById('app').innerHTML = pageContent;
-        if (page.afterRender) {
-            await page.afterRender();
-        }
-        const end = performance.now(); 
-        console.log(`Carregamento do componente para "${pathname}": ${(end - start).toFixed(2)} ms.`);
-        this.updateMetaTags(page.title, page.description, page.keywords);
-    }
-
-    async loadComponent(componentName) {
+        let normalizedHash = hash.startsWith('/#') ? hash : '/#' + hash.replace('#', '');
+        normalizedHash = normalizedHash === '/#' ? normalizedHash : normalizedHash;
+        const componentName = this.routes[normalizedHash];
         if (!componentName) {
-            const errorPage = await import(`../pages/ErrorPage.js`);
-            return errorPage.default;
+            console.error("Rota não encontrada, carregando página de erro.");
+            this.loadErrorPage();
+            return;
         }
-        if (this.components['/' + componentName.toLowerCase()]) {
-            return this.components['/' + componentName.toLowerCase()];
-        }
-        const module = await import(`../pages/${componentName}.js`);
-        return module.default;
+    
+        await this.loadAndRenderComponent(normalizedHash, componentName);
+        const end = performance.now();
+        console.log(`Carregamento do componente para "${normalizedHash}": ${(end - start).toFixed(2)} ms.`);
     }
+    
+    async loadAndRenderComponent(route, componentName) {
+        if (!this.componentCache[route]) {
+            try {
+                const module = await import(`../pages/${componentName}.js`);
+                const componentInstance = new module.default();
+                this.componentCache[route] = componentInstance;
+            } catch (e) {
+                console.error(`Erro ao carregar o componente: ${componentName}`, e);
+                this.loadErrorPage();
+                return;
+            }
+        }
+    
+        const component = this.componentCache[route];
+        const pageContent = await component.render();
+        document.getElementById('app').innerHTML = pageContent;
+        if (component.afterRender) await component.afterRender();
+        this.updateMetaTags(component.title, component.description, component.keywords);
+    }
+    
+    async loadErrorPage() {
+        const module = await import(`../pages/ErrorPage.js`);
+        const errorPage = new module.default();
+        document.getElementById('app').innerHTML = await errorPage.render();
+        if (errorPage.afterRender) await errorPage.afterRender();
+        this.updateMetaTags(errorPage.title, errorPage.description, errorPage.keywords);
+    }
+    
 
     updateMetaTags(title, description, keywords) {
         document.title = title;
+        this.updateMeta('description', description);
+        this.updateMeta('keywords', keywords);
+    }
 
-        let metaDescription = document.querySelector('meta[name="description"]');
-        if (metaDescription) {
-            metaDescription.setAttribute('content', description);
-        } else {
-            metaDescription = document.createElement('meta');
-            metaDescription.setAttribute('name', 'description');
-            metaDescription.setAttribute('content', description);
-            document.head.appendChild(metaDescription);
+    updateMeta(name, content) {
+        let element = document.querySelector(`meta[name="${name}"]`);
+        if (!element) {
+            element = document.createElement('meta');
+            element.setAttribute('name', name);
+            document.head.appendChild(element);
         }
-
-        let metaKeywords = document.querySelector('meta[name="keywords"]');
-        if (metaKeywords) {
-            metaKeywords.setAttribute('content', keywords);
-        } else {
-            metaKeywords = document.createElement('meta');
-            metaKeywords.setAttribute('name', 'keywords');
-            metaKeywords.setAttribute('content', keywords);
-            document.head.appendChild(metaKeywords);
-        }
+        element.setAttribute('content', content);
     }
 }
 

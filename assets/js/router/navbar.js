@@ -12,20 +12,25 @@ class Navbar extends Component {
             document.getElementById("myNav").style.height = "100%";
             document.getElementById("hamburg").innerText = "X";
         } else {
-            document.getElementById("myNav").style.height = "0%";
-            document.getElementById("hamburg").innerText = "☰";
+            this.closeNav();
         }
+    }
+
+    closeNav() {
+        this.navOpen = false; 
+        document.getElementById("myNav").style.height = "0%";
+        document.getElementById("hamburg").innerText = "☰";
     }
     render() {
         return `
             <div id="myNav" class="overlay">
                 <div class="overlay-content">
-                    <a href="/">Home</a>
-                    <a href="/about">Sobre</a>
-                    <a href="/contact">Contato</a>
+                    <a href="/#" id="homeLink">Home</a>
+                    <a href="/#about" id="aboutLink">Sobre</a>
+                    <a href="/#contact" id="contactLink">Contato</a>
                 </div>
             </div>
-            <div class="w3-bottom w3-black" style="z-index:99;">
+            <div class="w3-bottom w3-black" style="z-index:999;">
                 <button class="w3-bar w3-xlarge w3-black w3-display-bottommiddle" id="hamburg" style="cursor: pointer;">☰</button>
             </div>
             <div class="w3-container w3-black" hidden>
@@ -41,7 +46,11 @@ class Navbar extends Component {
     afterRender() {
         const hamburgButton = document.getElementById("hamburg");
         hamburgButton.addEventListener('click', () => this.openNav());
+        document.getElementById("homeLink").addEventListener('click', () => this.closeNav());
+        document.getElementById("aboutLink").addEventListener('click', () => this.closeNav());
+        document.getElementById("contactLink").addEventListener('click', () => this.closeNav());
     }
+    
 }
 
 export default Navbar;

@@ -91,14 +91,16 @@ if ('serviceWorker' in navigator) {
 
     const installModal = document.createElement('div');
     installModal.setAttribute('id', 'installModal');
-    installModal.style.zIndex = '97000';
+    installModal.style.zIndex = '3';
     installModal.style.top = '100px';
+    installModal.classList.add('w3-panel', 'w3-pale-green', 'w3-display-container', 'w3-border');
+
     installModal.innerHTML = `
         <div class="app-footer">
             <h2>Instalar Aplicativo</h2>
             <p>Quer instalar para uma experiência completa?</p>
-            <button id="installBtn" class="button4">Instalar</button>
-            <button id="cancelInstallBtn" class="button4">Cancelar</button>
+            <button id="installBtn" class="w3-button w3-teal">Instalar</button>
+            <button id="cancelInstallBtn" class="w3-button w3-grey">Cancelar</button>
         </div>
     `;
     document.body.appendChild(installModal);

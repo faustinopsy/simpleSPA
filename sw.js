@@ -1,4 +1,4 @@
-const CACHE_NAME = 'v001';
+const CACHE_NAME = 'v001.2';
 const STATIC_CACHE_URLS = [
  'index.html', 
  'offline.html',
